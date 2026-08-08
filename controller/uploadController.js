@@ -9,7 +9,7 @@ const NodeCache = require("node-cache");
 const { promisify } = require('util');
 
 // Initialize cache with 5 minute TTL
-const imageCache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
+const imageCaches = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 
 // Promisify database queries for better async/await support
 const queryAsync = promisify(pool.query).bind(pool);
@@ -17,10 +17,10 @@ const queryAsync = promisify(pool.query).bind(pool);
 // Cache management
 const invalidateCache = (cacheKeys = null) => {
   if (cacheKeys && Array.isArray(cacheKeys)) {
-    cacheKeys.forEach(key => imageCache.del(key));
+    cacheKeys.forEach(key => imageCaches.del(key));
     console.log(`Cache invalidated for keys: ${cacheKeys.join(', ')}`);
   } else {
-    imageCache.flushAll();
+    imageCaches.flushAll();
     console.log("All cache invalidated");
   }
 };
@@ -352,7 +352,7 @@ exports.getCloudImages = async (req, res) => {
     }
 
     const cacheKey = `gallery_${galleryId}`;
-    const cachedData = imageCache.get(cacheKey);
+    const cachedData = imageCaches.get(cacheKey);
 
     if (cachedData) {
       console.log("Serving gallery data from cache");
@@ -422,7 +422,7 @@ exports.getCloudImages = async (req, res) => {
       images: galleryData
     };
 
-    imageCache.set(cacheKey, result);
+    imageCaches.set(cacheKey, result);
     return res.json(result);
 
   } catch (error) {
@@ -513,7 +513,7 @@ exports.getAllImages = async (req, res) => {
   try {
     console.log("Fetching all local images");
     const cacheKey = "localImages";
-    const cachedData = imageCache.get(cacheKey);
+    const cachedData = imageCaches.get(cacheKey);
 
     if (cachedData) {
       console.log("Serving local images from cache");
@@ -613,7 +613,7 @@ exports.getAllImages = async (req, res) => {
     );
 
     // Cache and return
-    imageCache.set(cacheKey, formattedImages);
+    imageCaches.set(cacheKey, formattedImages);
     return res.json(formattedImages);
   } catch (error) {
     console.error("Error in getAllImages:", error);
@@ -897,7 +897,7 @@ exports.getDeletedGalleries = async (req, res) => {
 exports.fetchGalleries = async (req, res) => {
   try {
     // Check cache first
-    const cached = imageCache.get("galleries");
+    const cached = imageCaches.get("galleries");
     if (cached) {
       console.log("✅ Serving galleries from cache");
       return res.json(cached);
@@ -910,7 +910,7 @@ exports.fetchGalleries = async (req, res) => {
        WHERE status !="deleted" AND gallery_id IS NOT NULL`,
       (err, results) => {
         if (err) return res.status(500).json({ error: "Failed to fetch galleries" });
-        imageCache.set("galleries", results);
+        imageCaches.set("galleries", results);
         res.json(results);
       }
     );
@@ -925,9 +925,9 @@ exports.fetchAllImages = async (req, res) => {
     const now = Date.now();
 
     // check if cache is valid
-    if (imageCache.data && (now - imageCache.lastFetched < imageCache.ttl)) {
+    if (imageCaches.data && (now - imageCaches.lastFetched < imageCaches.ttl)) {
       console.log("📦 Serving images from cache");
-      return res.json(imageCache.data);
+      return res.json(imageCaches.data);
     }
 
     // otherwise fetch from Cloudinary
@@ -948,7 +948,7 @@ exports.fetchAllImages = async (req, res) => {
     imageCache = {
       data: images,
       lastFetched: now,
-      ttl: imageCache.stdTTL
+      ttl: imageCaches.stdTTL
     };
 
     console.log("☁️ Fetched images from Cloudinary");
