@@ -353,7 +353,7 @@ exports.createBooking = async (req, res) => {
       email, 
       location, 
       bookingNo, 
-      package, 
+      userpackage, 
       date, 
       time, 
       amount
@@ -388,7 +388,7 @@ exports.createBooking = async (req, res) => {
       phone: phone.replace(/\s+/g, ''),
       email: email.toLowerCase().trim(),
       location: location?.trim() || 'N/A',
-      package: package?.trim() || 'Standard',
+      package: userpackage?.trim() || 'Standard',
       date: new Date(date).toISOString().split("T")[0], // enforce format
       time: time.trim(),
       amount: parseFloat(amount),
