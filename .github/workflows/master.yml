@@ -1,0 +1,52 @@
+name: 🚀 Deploy Node.js Backend to cPanel (FTP-only)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Install Deps
+        run: |
+          npm install
+
+      - name: 🌍 Upload via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./
+          server-dir: /api/
+          exclude: |
+            **/.git*
+            **/.github*
+            node_modules/**
+            deploy/**
+
+      - name: 🔄 Trigger Restart (Passenger)
+        run: |
+          echo "restart $(date)" > restart.txt
+      - name: 🚀 Upload restart.txt
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./
+          server-dir: /api/tmp/
+          exclude: |
+            **/*
+          include: |
+            restart.txt
