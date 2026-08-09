@@ -8,17 +8,17 @@ require('dotenv').config({
   
   // Prevent re-initialising on hot reloads (e.g. nodemon) using getApps()
   if (admin.apps.length === 0) {
-    const appCredential = process.env.GOOGLE_APPLICATION_CREDENTIALS
-        ? // File-based credential (recommended for local dev)
-          admin.credential.applicationDefault()
-        : // Env-var credential (recommended for production / CI)
-          admin.credential.cert({
-            projectId:   process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // The private key comes in as a single env-var string with literal \n
-            privateKey:  (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
-          });
-   
+    let appCredential;
+
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      // Parses the entire JSON string cleanly on Vercel (No newline issues!)
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      appCredential = admin.credential.cert(serviceAccount);
+    } else {
+      // Fallback to standard file-based credentials for local development
+      appCredential = admin.credential.applicationDefault();
+    }
+
     admin.initializeApp({ credential: appCredential });
   }
    
