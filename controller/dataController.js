@@ -16,6 +16,7 @@ const ATTEMPT_WINDOW_MINUTES = 15;
 const GRANT_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — "stay unlocked" like Pixieset
 
 // ── Signed unlock grants ────────────────────────────────────────────────────
+GALLERY_GRANT_SECRET=9f8b7a6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a
 const GRANT_SECRET = process.env.GALLERY_GRANT_SECRET || process.env.JWT_SECRET;
 if (!GRANT_SECRET) {
   
