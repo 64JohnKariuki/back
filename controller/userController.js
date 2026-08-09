@@ -6,7 +6,7 @@ const User = require('../models/userModel');
 const SessionService = require('../services/sessionService');
 const { generateAccessAndRefreshToken, refreshToken } = require('../middleware/authMiddleware');
 const logger = require('../services/logger');
-const { sendVerificationEmail } = require('../config/email');
+const { sendVerificationEmail, sendEmail } = require('../config/email');
 const { verifyFirebaseToken } = require('../config/firebaseAdmin');
 
 require('dotenv').config({
@@ -893,8 +893,6 @@ exports.submitContact = async (req, res) => {
         error: 'Name, email, and message are required.',
       });
     }
-
-    const { sendEmail } = require('../config/email');
 
     // Send email to user
     await sendEmail({
