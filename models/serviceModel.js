@@ -15,7 +15,7 @@ exports.getServices = (req, res) => {
 };
 
 // Fetch all services with their packages
-exports.getPack = (package) => {
+exports.getPack = (p_package) => {
   return new Promise((resolve, reject) => {
     const query = `
       SELECT 
@@ -27,7 +27,7 @@ exports.getPack = (package) => {
       LIMIT 1
     `;
 
-    pool.query(query, [package], (err, result) => {
+    pool.query(query, [p_package], (err, result) => {
       if (err) {
         reject(err);
       } else {
