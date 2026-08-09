@@ -5,6 +5,7 @@ const { requireAuth } = require("../middleware/authMiddleware");
 const { apiLimiter } = require("../middleware/securityMiddleware");
 const { validateContactForm } = require("../middleware/validators");
 const userController = require("../controller/userController");
+const { sendEmail } = require("../config/email");
 
 /**
  * @route POST /api/contact/send
@@ -15,6 +16,7 @@ router.post(
   "/send",
   apiLimiter,
   validateContactForm,
+  sendEmail,
   userController.submitContact
 );
 
