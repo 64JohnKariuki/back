@@ -534,8 +534,8 @@ exports.handlePaymentCallback = async (req, res) => {
         });
       }
 
-      const package = bookingData.package
-      const service = await serviceModel.getPack(package);
+      const p_package = bookingData.package
+      const service = await serviceModel.getPack(p_package);
       console.log("✅ Services fetched", service);
 
       const updatedBooking = {
